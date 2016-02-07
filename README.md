@@ -16,7 +16,7 @@ Components :
 * Buffer : Text + Encoding (ICU)
 * Scanner : Tokenizer
 * Parser : Builds DOM tree
-* Tree Visitor : processes the DOM tree
+* Tree Visitor : Processes the DOM tree
 
 
 # Progress
