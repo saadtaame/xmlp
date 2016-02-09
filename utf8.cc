@@ -42,10 +42,6 @@ UTF8Char utf8_getc( unsigned char *buf ) {
 
     /* masks - masks for utf8 first byte prefix bits
        prefix - values for utf8 first byte prefix bits
-
-       masks = {1xxxxxxx, 111xxxxx, 1111xxxx, 11111xxx}
-       prefix = {0xxxxxxx, 110xxxxx, 1110xxxx, 11110xxx}
-
        the subsequent bytes should all match the pattern 10xxxxxx
     */
     unsigned char masks[] = {128, 224, 240, 248};
@@ -61,7 +57,7 @@ UTF8Char utf8_getc( unsigned char *buf ) {
             bytes[0] = *bufp++;
             for(int j = 1; j < i + 1; j++) {
                 if( ( 192 & (*bufp) ) != 128 )
-                    /* Illegal utf8 byte */
+                    /* illegal utf8 byte */
                     ;
                 bytes[j] = *bufp++;
             }
@@ -69,7 +65,7 @@ UTF8Char utf8_getc( unsigned char *buf ) {
         }
     }
 
-    /* Illegal utf8 byte */
+    /* illegal utf8 byte */
 }
 
 void utf8_putc( UTF8Char &c ) {
