@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <cstring>
+#include <iostream>
 
 using namespace std;
 
@@ -77,14 +79,25 @@ void cat( const char *fname ) {
     FILE *f;
     UTF8Char c;
     unsigned char buf[4096];
+    unsigned char *bufp = NULL;
 
     f = fopen(fname, "rb");
     if(f != NULL) {
         int num_bytes_read = (int)fread(buf, sizeof(unsigned char), sizeof(buf), f);
+        bufp = buf;
 
-        c = utf8_getc(buf);
+        /* skip byte order mark if present */
+        if(num_bytes_read > 2) {
+            unsigned char bom[] = {0xEF, 0xBB, 0xBF};
+            unsigned char bytes[] = {*bufp, *(bufp + 1), *(bufp + 2)};
+            if(memcmp((void *)bom, (void *)bytes, sizeof(bom)) == 0) {
+                num_bytes_read -= 3;
+                bufp += 3;
+            }
+        }
+
+        c = utf8_getc(bufp);
         utf8_putc(c);
-
         for(int i = c.num_bytes; i < num_bytes_read; i += c.num_bytes)
             utf8_putc( c = utf8_getc(0) );
 
