@@ -1,42 +1,31 @@
-#include <cstdio>
-#include <cstring>
-#include <iostream>
+#include "../api/utf8.h"
 
-using namespace std;
+UTF8Char::UTF8Char( unsigned char bytes_[], int num_bytes_ ): num_bytes(num_bytes_) {
+    for(int i = 0; i < num_bytes_; i++)
+        bytes[i] = bytes_[i];
+}
 
-struct UTF8Char {
-    unsigned char bytes[4];
-    int num_bytes;
+UTF8Char::UTF8Char( unsigned char byte1 ): num_bytes(1) {
+    bytes[0] = byte1;
+}
 
-    UTF8Char(): num_bytes(0) {}
+UTF8Char::UTF8Char( unsigned char byte1, unsigned char byte2 ): num_bytes(2) {
+    bytes[0] = byte1;
+    bytes[1] = byte2;
+}
 
-    UTF8Char( unsigned char bytes_[], int num_bytes_ ): num_bytes(num_bytes_) {
-        for(int i = 0; i < num_bytes_; i++)
-            bytes[i] = bytes_[i];
-    }
+UTF8Char::UTF8Char( unsigned char byte1, unsigned char byte2, unsigned char byte3 ): num_bytes(3) {
+    bytes[0] = byte1;
+    bytes[1] = byte2;
+    bytes[2] = byte3;
+}
 
-    UTF8Char( unsigned char byte1 ): num_bytes(1) {
-        bytes[0] = byte1;
-    }
-
-    UTF8Char( unsigned char byte1, unsigned char byte2 ): num_bytes(2) {
-        bytes[0] = byte1;
-        bytes[1] = byte2;
-    }
-
-    UTF8Char( unsigned char byte1, unsigned char byte2, unsigned char byte3 ): num_bytes(3) {
-        bytes[0] = byte1;
-        bytes[1] = byte2;
-        bytes[2] = byte3;
-    }
-
-    UTF8Char( unsigned char byte1, unsigned char byte2, unsigned char byte3, unsigned char byte4 ): num_bytes(4) {
-        bytes[0] = byte1;
-        bytes[1] = byte2;
-        bytes[2] = byte3;
-        bytes[3] = byte4;
-    }
-};
+UTF8Char::UTF8Char( unsigned char byte1, unsigned char byte2, unsigned char byte3, unsigned char byte4 ): num_bytes(4) {
+    bytes[0] = byte1;
+    bytes[1] = byte2;
+    bytes[2] = byte3;
+    bytes[3] = byte4;
+}
 
 UTF8Char utf8_getc( unsigned char *buf ) {
     static unsigned char *bufp = 0; /* pointer to current byte in buf */
@@ -70,7 +59,7 @@ UTF8Char utf8_getc( unsigned char *buf ) {
     /* illegal utf8 byte */
 }
 
-void utf8_putc( UTF8Char &c ) {
+void utf8_putc( UTF8Char c ) {
     for(int i = 0; i < c.num_bytes; i++)
         putchar(c.bytes[i]);
 }
@@ -103,9 +92,4 @@ void cat( const char *fname ) {
 
         fclose(f);
     }
-}
-
-int main( void ) {
-    cat("doc.txt");
-    return 0;
 }
