@@ -8,6 +8,27 @@ Buffer::Buffer( void ) {
     is_open = false;
 }
 
+void Buffer::step( void ) {
+    end += 1;
+    if(buffer[end] == Buffer::END_OF_BUFFER) {
+        if(end == BLOCK_SIZE) {
+            int last_byte_index;
+            last_byte_index = (int)fread(buffer + BLOCK_SIZE + 1, sizeof(unsigned char), BLOCK_SIZE, f);
+            buffer[last_byte_index + BLOCK_SIZE + 1] = Buffer::END_OF_BUFFER;
+            end += 1;
+        }
+        else if(end == BLOCK_SIZE + BLOCK_SIZE + 1) {
+            int last_byte_index;
+            last_byte_index = (int)fread(buffer, sizeof(unsigned char), BLOCK_SIZE, f);
+            buffer[last_byte_index] = Buffer::END_OF_BUFFER;
+            end = 0;
+        }
+        else {
+            saw_EOF = true;
+        }
+    }
+}
+
 void Buffer::open( const char *fname ) {
     if(is_open) {
         /* TODO: handle error */

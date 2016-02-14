@@ -27,8 +27,7 @@ UTF8Char::UTF8Char( unsigned char byte1, unsigned char byte2, unsigned char byte
     bytes[3] = byte4;
 }
 
-UTF8Char utf8_getc( unsigned char *buf ) {
-    static unsigned char *bufp = 0; /* pointer to current byte in buf */
+UTF8Char utf8_getc( Buffer &buf ) {
     static unsigned char bytes[4];
 
     /* masks - masks for utf8 first byte prefix bits
@@ -38,19 +37,17 @@ UTF8Char utf8_getc( unsigned char *buf ) {
     unsigned char masks[] = {128, 224, 240, 248};
     unsigned char prefix[] = {0, 192, 224, 240};
 
-    if(buf) bufp = buf; /* new buffer to scan */
-
-    if(*bufp == EOF)
-        return UTF8Char(EOF);
+    unsigned char byte = buf.next_byte();
 
     for(int i = 0; i < 4; i++) {
-        if( ( masks[i] & (*bufp) )  == prefix[i] ) {
-            bytes[0] = *bufp++;
+        if( ( masks[i] & byte )  == prefix[i] ) {
+            bytes[0] = byte;
             for(int j = 1; j < i + 1; j++) {
-                if( ( 192 & (*bufp) ) != 128 )
+                byte = buf.next_byte();
+                if( ( 192 & byte ) != 128 )
                     /* illegal utf8 byte */
                     ;
-                bytes[j] = *bufp++;
+                bytes[j] = byte;
             }
             return UTF8Char(bytes, i + 1);
         }
@@ -65,31 +62,12 @@ void utf8_putc( UTF8Char c ) {
 }
 
 void cat( const char *fname ) {
-    FILE *f;
+    Buffer buf;
     UTF8Char c;
-    unsigned char buf[4096];
-    unsigned char *bufp = NULL;
 
-    f = fopen(fname, "rb");
-    if(f != NULL) {
-        int num_bytes_read = (int)fread(buf, sizeof(unsigned char), sizeof(buf), f);
-        bufp = buf;
+    buf.open(fname);
+    while(buf.has_next())
+        utf8_putc(utf8_getc(buf));
 
-        /* skip byte order mark if present */
-        if(num_bytes_read > 2) {
-            unsigned char bom[] = {0xEF, 0xBB, 0xBF};
-            unsigned char bytes[] = {*bufp, *(bufp + 1), *(bufp + 2)};
-            if(memcmp((void *)bom, (void *)bytes, sizeof(bom)) == 0) {
-                num_bytes_read -= 3;
-                bufp += 3;
-            }
-        }
-
-        c = utf8_getc(bufp);
-        utf8_putc(c);
-        for(int i = c.num_bytes; i < num_bytes_read; i += c.num_bytes)
-            utf8_putc( c = utf8_getc(0) );
-
-        fclose(f);
-    }
+    buf.close();
 }
