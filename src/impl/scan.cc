@@ -1,5 +1,5 @@
 #include "../api/scan.h"
 
-int main( void ) {
-    return 0;
+Token Scanner::next_token() {
+    
 }
